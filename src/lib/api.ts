@@ -50,5 +50,14 @@ export const api = {
     delete: (key: string) => request(`/files/${key}`, { method: "DELETE" }),
   },
 
+  pages: {
+    get: (slug: string) => request<{ slug: string; title: string; content: string; updated_at: string }>(`/pages/${slug}`),
+    update: (slug: string, content: string) =>
+      request<{ slug: string; title: string; content: string; updated_at: string }>(`/pages/${slug}`, {
+        method: "PUT",
+        body: JSON.stringify({ content }),
+      }),
+  },
+
   health: () => request<{ status: string; env: string }>("/health"),
 };

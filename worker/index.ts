@@ -3,6 +3,7 @@ import { handleCors, corsHeaders } from "./middleware/cors";
 import { handleUsers } from "./routes/users";
 import { handleFiles } from "./routes/files";
 import { handlePosts } from "./routes/posts";
+import { handlePages } from "./routes/pages";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -29,6 +30,10 @@ export default {
 
       if (pathname.startsWith("/api/posts")) {
         return await handlePosts(request, env, pathname);
+      }
+
+      if (pathname.startsWith("/api/pages")) {
+        return await handlePages(request, env, pathname);
       }
 
       // 헬스체크

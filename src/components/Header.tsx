@@ -44,9 +44,9 @@ export function Header() {
         {/* 네비게이션 */}
         <nav style={{ display: "flex", alignItems: "center", gap: 28, flexShrink: 0 }}>
           <span style={navLink(location.pathname === "/")} onClick={() => navigate("/")}>게시판</span>
-          <span style={navLink(false)}>협회소개</span>
-          <span style={navLink(false)}>행사일정</span>
-          <span style={navLink(false)}>자료실</span>
+          <span style={navLink(location.pathname === "/page/about")} onClick={() => navigate("/page/about")}>협회소개</span>
+          <span style={navLink(location.pathname === "/page/events")} onClick={() => navigate("/page/events")}>행사일정</span>
+          <span style={navLink(location.pathname === "/page/resources")} onClick={() => navigate("/page/resources")}>자료실</span>
         </nav>
       </div>
 

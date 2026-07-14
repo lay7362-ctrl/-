@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f7f9; font-family: 'Inter', -apple-system, sans-serif; }
+    ::selection { background: #cfe3f5; }
+    input, textarea, select, button { font-family: inherit; }
+    input:focus, textarea:focus, select:focus { outline: none; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; color:#1a2330;">
+
+  <!-- HEADER -->
+  <header style="position: sticky; top: 0; z-index: 50; border-bottom: 1px solid #0a1926; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 68px; background-color: #07C7B9">
+    <div style="display:flex; align-items:center; gap:36px;">
+      <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="{{ goTo_feed }}">
+        <div style="position:relative; width:34px; height:34px; border-radius:50%; background:#16324f; border:1.5px solid #3d7ab5; flex:none;">
+          <div style="position:absolute; top:50%; left:50%; width:20px; height:3px; background:#eaf2fa; transform:translate(-50%,-50%);"></div>
+          <div style="position:absolute; top:50%; left:50%; width:3px; height:20px; background:#eaf2fa; transform:translate(-50%,-50%);"></div>
+          <div style="position:absolute; top:2px; left:2px; width:5px; height:5px; border-radius:50%; background:#3d7ab5;"></div>
+          <div style="position:absolute; top:2px; right:2px; width:5px; height:5px; border-radius:50%; background:#3d7ab5;"></div>
+          <div style="position:absolute; bottom:2px; left:2px; width:5px; height:5px; border-radius:50%; background:#3d7ab5;"></div>
+          <div style="position:absolute; bottom:2px; right:2px; width:5px; height:5px; border-radius:50%; background:#3d7ab5;"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; line-height:1.1;">
+          <span style="font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: 0.2px; width: 157px; height: 36px">KDDA<br>한국드론앤데이터협회</span>
+          <span style="font-size:10px; font-weight:500; color:#7fa8cc; letter-spacing:0.6px;">KOREA DRONE ASSOCIATION</span>
+        </div>
+      </div>
+      <nav style="display:flex; align-items:center; gap:28px; flex:none;">
+        <span style="{{ navLinkStyle_board }}" onclick="{{ goTo_feed }}">게시판</span>
+        <span style="{{ navLinkStyle_static }}">협회소개</span>
+        <span style="{{ navLinkStyle_static }}">행사일정</span>
+        <span style="{{ navLinkStyle_static }}">자료실</span>
+      </nav>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="display:flex; align-items:center; gap:8px; background:#16324f; border:1px solid #244a6e; border-radius:8px; padding:8px 12px; width:170px; flex:none;">
+        <div style="width:14px; height:14px; border-radius:50%; border:2px solid #7fa8cc; flex:none;"></div>
+        <input placeholder="검색어를 입력하세요" style="background:transparent; border:none; color:#eaf2fa; font-size:13px; width:100%; min-width:0;">
+      </div>
+
+      <sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ false }}">
+        <button style="background:#3d7ab5; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer;" onclick="{{ goTo_write }}">글쓰기</button>
+        <div style="width:34px; height:34px; border-radius:50%; background:#244a6e; display:flex; align-items:center; justify-content:center; color:#eaf2fa; font-size:13px; font-weight:700; cursor:pointer;" onclick="{{ logout }}" title="로그아웃">홍</div>
+      </sc-if>
+      <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}">
+        <span style="color:#c8d8e8; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; flex:none;" onclick="{{ goTo_login }}">로그인</span>
+        <button style="background:#3d7ab5; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; flex:none;" onclick="{{ goTo_login }}">회원가입</button>
+      </sc-if>
+    </div>
+  </header>
+
+  <!-- ============ FEED VIEW ============ -->
+  <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="메인 게시판" style="flex:1; width:100%;">
+      <div style="background: linear-gradient(120deg, #07EADF, #173657); padding: 36px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+        <div>
+          <div style="color:#7fa8cc; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:8px;">공식 회원 커뮤니티</div>
+          <div style="color:#fff; font-size:26px; font-weight:800; margin-bottom:6px;">대한민국 드론 산업을 함께 만듭니다</div>
+          <div style="color: #DAE3EC; font-size: 14px">비행 정보 공유, 기체 리뷰, 행사 소식까지 — 회원 여러분의 이야기</div>
+        </div>
+        <div style="display:flex; gap:28px;">
+          <div style="text-align:center;">
+            <div style="color:#fff; font-size:22px; font-weight:800;">12,480</div>
+            <div style="color:#7fa8cc; font-size:11px; font-weight:600; letter-spacing:0.4px;">회원수</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#fff; font-size:22px; font-weight:800;">3,207</div>
+            <div style="color:#7fa8cc; font-size:11px; font-weight:600; letter-spacing:0.4px;">게시글</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#fff; font-size:22px; font-weight:800;">18</div>
+            <div style="color:#7fa8cc; font-size:11px; font-weight:600; letter-spacing:0.4px;">예정 행사</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="max-width:1180px; margin:0 auto; padding:28px 32px 64px; display:grid; grid-template-columns:220px 1fr 260px; gap:24px; align-items:start;">
+
+        <!-- left: categories -->
+        <aside style="display:flex; flex-direction:column; gap:6px; position:sticky; top:88px;">
+          <div style="font-size:12px; font-weight:700; color:#8a94a3; letter-spacing:0.5px; padding:0 4px 8px;">카테고리</div>
+          <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
+            <div style="{{ cat.style }}" onclick="{{ cat.onClick }}">{{ cat.label }}</div>
+          </sc-for>
+          <div style="margin-top:18px; background:#fff; border:1px solid #e2e6eb; border-radius:10px; padding:16px;">
+            <div style="font-size:12px; font-weight:700; color:#0f2136; margin-bottom:8px;">협회 소개</div>
+            <div style="font-size:12px; color:#6b7684; line-height:1.6;">KDA는 안전하고 건전한 드론 문화 확산을 위해 2016년 설립된 비영리 회원 단체입니다.</div>
+          </div>
+        </aside>
+
+        <!-- center: posts -->
+        <section style="display:flex; flex-direction:column; gap:12px; min-width:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-size:18px; font-weight:800; color:#0f2136; white-space:nowrap;">{{ activeCategoryLabel }}</div>
+            <div style="font-size:12px; color:#8a94a3; white-space:nowrap; flex:none;">전체 {{ postCount }}건</div>
+          </div>
+
+          <sc-for list="{{ filteredPosts }}" as="post" hint-placeholder-count="5">
+            <div style="background:#fff; border:1px solid #e2e6eb; border-radius:12px; padding:16px; display:flex; gap:16px; cursor:pointer; transition:border-color 0.15s;" style-hover="border-color:#3d7ab5;" onclick="{{ post.onClick }}">
+              <div style="width:112px; height:80px; border-radius:8px; flex:none; background:repeating-linear-gradient(45deg,#e7edf3,#e7edf3 6px,#dbe4ec 6px,#dbe4ec 12px); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#8a9bb0; text-align:center; line-height:1.4;">DRONE<br>PHOTO</span>
+              </div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:nowrap;">
+                  <sc-if value="{{ post.pinned }}" hint-placeholder-val="{{ false }}">
+                    <span style="background:#fdf1de; color:#a8681c; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:5px; white-space:nowrap; flex:none;">공지</span>
+                  </sc-if>
+                  <span style="background:#eaf2fa; color:#245a8a; font-size:11px; font-weight:700; padding:3px 8px; border-radius:5px; white-space:nowrap; flex:none;">{{ post.category }}</span>
+                </div>
+                <div style="font-size:15px; font-weight:700; color:#182430; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ post.title }}</div>
+                <div style="font-size:13px; color:#8a94a3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ post.excerpt }}</div>
+                <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#9aa4b1; margin-top:2px; white-space:nowrap; overflow:hidden;">
+                  <span style="white-space:nowrap;">{{ post.author }}</span><span>·</span><span style="white-space:nowrap;">{{ post.date }}</span><span>·</span><span style="white-space:nowrap;">댓글 {{ post.comments }}</span><span>·</span><span style="white-space:nowrap;">추천 {{ post.likes }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </section>
+
+        <!-- right: events / notices -->
+        <aside style="display:flex; flex-direction:column; gap:16px; position:sticky; top:88px;">
+          <div style="background:#fff; border:1px solid #e2e6eb; border-radius:10px; padding:16px;">
+            <div style="font-size:12px; font-weight:700; color:#0f2136; margin-bottom:12px;">다가오는 행사</div>
+            <sc-for list="{{ events }}" as="ev" hint-placeholder-count="3">
+              <div style="display:flex; gap:10px; padding:8px 0; border-top:1px solid #f0f2f5;">
+                <div style="width:38px; flex:none; text-align:center;">
+                  <div style="font-size:10px; font-weight:700; color:#3d7ab5;">{{ ev.month }}</div>
+                  <div style="font-size:16px; font-weight:800; color:#0f2136;">{{ ev.day }}</div>
+                </div>
+                <div style="font-size:12.5px; color:#3a4452; line-height:1.4;">{{ ev.title }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#0f2136; border-radius:10px; padding:16px;">
+            <div style="font-size:12px; font-weight:700; color:#fff; margin-bottom:6px;">회원 등급 안내</div>
+            <div style="font-size:12px; color:#a9c2d9; line-height:1.6;">정회원 자격으로 드론 자격시험 할인, 세미나 우선 참가 혜택을 받아보세요.</div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ============ POST DETAIL VIEW ============ -->
+  <sc-if value="{{ isPost }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="게시글 상세" style="flex:1; max-width:860px; margin:0 auto; width:100%; padding:32px;">
+      <div style="font-size:13px; color:#3d7ab5; font-weight:700; cursor:pointer; margin-bottom:16px;" onclick="{{ goTo_feed }}">← 목록으로</div>
+      <div style="background:#fff; border:1px solid #e2e6eb; border-radius:12px; padding:32px;">
+        <span style="background:#eaf2fa; color:#245a8a; font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:5px;">{{ selectedPost.category }}</span>
+        <div style="font-size:24px; font-weight:800; color:#0f2136; margin:14px 0 10px;">{{ selectedPost.title }}</div>
+        <div style="display:flex; align-items:center; gap:12px; font-size:12.5px; color:#8a94a3; padding-bottom:18px; border-bottom:1px solid #eef1f4;">
+          <div style="width:26px; height:26px; border-radius:50%; background:#dbe4ec; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#4a5a6a;">{{ selectedPost.authorInitial }}</div>
+          <span>{{ selectedPost.author }}</span><span>·</span><span>{{ selectedPost.date }}</span><span>·</span><span>조회 {{ selectedPost.views }}</span>
+        </div>
+        <div style="width:100%; height:280px; margin:20px 0; border-radius:10px; background:repeating-linear-gradient(45deg,#e7edf3,#e7edf3 8px,#dbe4ec 8px,#dbe4ec 16px); display:flex; align-items:center; justify-content:center;">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#8a9bb0;">DRONE PHOTO PLACEHOLDER — 1600×900</span>
+        </div>
+        <div style="font-size:14.5px; color:#3a4452; line-height:1.9; white-space:pre-line;">{{ selectedPost.body }}</div>
+
+        <div style="display:flex; align-items:center; gap:10px; margin-top:28px;">
+          <button style="background:#eaf2fa; color:#245a8a; border:1px solid #cfe3f5; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer;">추천 {{ selectedPost.likes }}</button>
+          <button style="background:#f5f7f9; color:#6b7684; border:1px solid #e2e6eb; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer;">스크랩</button>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #e2e6eb; border-radius:12px; padding:24px 32px; margin-top:16px;">
+        <div style="font-size:14px; font-weight:700; color:#0f2136; margin-bottom:14px;">댓글 {{ selectedPost.comments }}</div>
+        <sc-for list="{{ dummyComments }}" as="c" hint-placeholder-count="3">
+          <div style="display:flex; gap:10px; padding:12px 0; border-top:1px solid #f0f2f5;">
+            <div style="width:26px; height:26px; border-radius:50%; background:#dbe4ec; flex:none; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#4a5a6a;">{{ c.initial }}</div>
+            <div>
+              <div style="font-size:12.5px; font-weight:700; color:#182430;">{{ c.author }} <span style="font-weight:400; color:#a3adba; margin-left:6px;">{{ c.date }}</span></div>
+              <div style="font-size:13px; color:#3a4452; margin-top:3px;">{{ c.body }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <input placeholder="댓글을 남겨보세요" style="flex:1; border:1px solid #e2e6eb; border-radius:8px; padding:10px 12px; font-size:13px;">
+          <button style="background:#3d7ab5; color:#fff; border:none; border-radius:8px; padding:0 18px; font-size:13px; font-weight:700; cursor:pointer;">등록</button>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ============ WRITE VIEW ============ -->
+  <sc-if value="{{ isWrite }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="글쓰기" style="flex:1; max-width:760px; margin:0 auto; width:100%; padding:32px;">
+      <div style="font-size:20px; font-weight:800; color:#0f2136; margin-bottom:20px;">새 글 작성</div>
+      <div style="background:#fff; border:1px solid #e2e6eb; border-radius:12px; padding:28px; display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">카테고리</div>
+          <select style="width:100%; border:1px solid #e2e6eb; border-radius:8px; padding:10px 12px; font-size:13.5px; color:#182430;" value="{{ formCategory }}" onChange="{{ onFormCategoryChange }}">
+            <sc-for list="{{ writeCategories }}" as="wc" hint-placeholder-count="5">
+              <option value="{{ wc }}">{{ wc }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">제목</div>
+          <input placeholder="제목을 입력하세요" style="width:100%; border:1px solid #e2e6eb; border-radius:8px; padding:11px 12px; font-size:14px;" value="{{ formTitle }}" onChange="{{ onFormTitleChange }}">
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">사진 첨부</div>
+          <div style="border:1.5px dashed #cfd6de; border-radius:10px; height:120px; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#9aa4b1;">이미지를 드래그하거나 클릭하여 업로드</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">내용</div>
+          <textarea placeholder="내용을 입력하세요" style="width:100%; height:220px; border:1px solid #e2e6eb; border-radius:8px; padding:12px; font-size:14px; line-height:1.6; resize:vertical;" value="{{ formBody }}" onChange="{{ onFormBodyChange }}"></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:4px;">
+          <button style="background:#f5f7f9; color:#6b7684; border:1px solid #e2e6eb; border-radius:8px; padding:10px 20px; font-size:13.5px; font-weight:600; cursor:pointer;" onclick="{{ goTo_feed }}">취소</button>
+          <button style="background:#3d7ab5; color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:13.5px; font-weight:700; cursor:pointer;" onclick="{{ submitPost }}">등록하기</button>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ============ LOGIN / SIGNUP VIEW ============ -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="로그인/회원가입" style="flex:1; display:flex; align-items:center; justify-content:center; padding:48px 24px; background:#f5f7f9;">
+      <div style="width:380px; background:#fff; border:1px solid #e2e6eb; border-radius:14px; padding:32px;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:22px;">
+          <div style="position:relative; width:30px; height:30px; border-radius:50%; background:#16324f; border:1.5px solid #3d7ab5; flex:none;">
+            <div style="position:absolute; top:50%; left:50%; width:17px; height:2.5px; background:#eaf2fa; transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute; top:50%; left:50%; width:2.5px; height:17px; background:#eaf2fa; transform:translate(-50%,-50%);"></div>
+          </div>
+          <span style="font-size:16px; font-weight:800; color:#0f2136;">KDA 드론협회</span>
+        </div>
+
+        <div style="display:flex; border-bottom:1px solid #eef1f4; margin-bottom:20px;">
+          <div style="{{ authTabStyle_login }}" onclick="{{ setAuthTab_login }}">로그인</div>
+          <div style="{{ authTabStyle_signup }}" onclick="{{ setAuthTab_signup }}">회원가입</div>
+        </div>
+
+        <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">이름</div>
+            <input placeholder="홍길동" style="width:100%; border:1px solid #e2e6eb; border-radius:8px; padding:10px 12px; font-size:13.5px;" value="{{ authName }}" onChange="{{ onAuthNameChange }}">
+          </div>
+        </sc-if>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">이메일</div>
+          <input placeholder="you@example.com" style="width:100%; border:1px solid #e2e6eb; border-radius:8px; padding:10px 12px; font-size:13.5px;" value="{{ authEmail }}" onChange="{{ onAuthEmailChange }}">
+        </div>
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px; font-weight:700; color:#4a5a6a; margin-bottom:6px;">비밀번호</div>
+          <input type="password" placeholder="••••••••" style="width:100%; border:1px solid #e2e6eb; border-radius:8px; padding:10px 12px; font-size:13.5px;" value="{{ authPassword }}" onChange="{{ onAuthPasswordChange }}">
+        </div>
+
+        <button style="width:100%; background:#3d7ab5; color:#fff; border:none; border-radius:8px; padding:12px; font-size:14px; font-weight:700; cursor:pointer;" onclick="{{ submitAuth }}">{{ authSubmitLabel }}</button>
+
+        <div style="text-align:center; font-size:12.5px; color:#9aa4b1; margin-top:16px; cursor:pointer;" onclick="{{ goTo_feed }}">← 게시판으로 돌아가기</div>
+      </div>
+    </main>
+  </sc-if>
+
+  <footer style="background:#0f2136; padding:20px 32px; text-align:center;">
+    <span style="color:#5f7997; font-size:11.5px;">© 2026 KDA 대한드론협회. 본 사이트는 프로토타입 데모입니다.</span>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+const CATEGORY_LIST = ["전체","공지사항","자유게시판","기체정보","비행후기","Q&A"];
+const WRITE_CATEGORIES = ["자유게시판","기체정보","비행후기","Q&A"];
+
+const INITIAL_POSTS = [
+  { id: 101, category: "공지사항", pinned: true, title: "2026년 하반기 정기총회 안내", excerpt: "10월 셋째 주 정기총회 개최 및 안건 안내드립니다.", author: "협회사무국", date: "2026.07.10", comments: 12, likes: 34, views: 1820, authorInitial: "협", body: "안녕하세요, 회원 여러분.\n\n2026년 하반기 정기총회를 아래와 같이 개최합니다. 많은 참여 부탁드립니다.\n\n- 일시: 2026년 10월 17일 (토) 14:00\n- 장소: 협회 대강당\n- 안건: 예산안 승인, 신규 자격제도 소개" },
+  { id: 102, category: "기체정보", pinned: false, title: "인스파이어4 초기 배터리 세팅 팁 공유합니다", excerpt: "저온 환경에서 배터리 예열 방법 정리했어요", author: "하늘위드론", date: "2026.07.09", comments: 8, likes: 21, views: 640, authorInitial: "하", body: "겨울철 저온 비행 시 배터리 성능 저하를 줄이는 방법을 정리했습니다.\n\n1. 비행 전 실내에서 20분 이상 예열\n2. 배터리 온도가 15도 이상일 때 이륙\n3. 예비 배터리는 보온팩과 함께 보관" },
+  { id: 103, category: "비행후기", pinned: false, title: "제주 성산일출봉 항공촬영 다녀왔습니다", excerpt: "허가 절차부터 촬영 포인트까지 후기 남겨요", author: "촬영왕민수", date: "2026.07.08", comments: 15, likes: 47, views: 980, authorInitial: "촬", body: "제주 성산일출봉 인근 촬영을 위해 사전 비행 승인을 받는 과정을 공유합니다.\n\n국토부 허가부터 문화재청 협의까지 약 3주가 소요되었고, 실제 촬영은 일출 직후 30분간 진행했습니다." },
+  { id: 104, category: "Q&A", pinned: false, title: "초경량비행장치 조종자 자격시험 후기 궁금합니다", excerpt: "실기시험 난이도가 어느 정도인가요?", author: "드론입문", date: "2026.07.07", comments: 22, likes: 9, views: 512, authorInitial: "드", body: "다음 달 실기시험을 앞두고 있는데, 최근 응시하신 분들의 후기가 궁금합니다.\n\n특히 정지비행과 마름모 비행 코스에서 감점 요인이 궁금해요." },
+  { id: 105, category: "자유게시판", pinned: false, title: "드론 동호회 정모 다녀온 사진 몇 장 올립니다", excerpt: "이번 주말 한강공원 정모 즐거웠습니다", author: "한강라이더", date: "2026.07.06", comments: 6, likes: 18, views: 402, authorInitial: "한", body: "이번 주말 한강 정모에 참석해주신 모든 분들 감사합니다.\n\n다음 정모는 8월 첫째 주 예정이며 신규 회원분들도 편하게 참여해주세요." },
+  { id: 106, category: "기체정보", pinned: false, title: "국산 산업용 드론 신제품 스펙 비교", excerpt: "방제/측량용 기체 3종 비교 정리했습니다", author: "산업드론연구소", date: "2026.07.05", comments: 10, likes: 29, views: 733, authorInitial: "산", body: "최근 출시된 국산 산업용 드론 3종의 적재량, 비행시간, 가격을 비교했습니다.\n\n방제용은 적재량 위주로, 측량용은 정밀도와 배터리 효율을 중점적으로 비교했습니다." },
+  { id: 107, category: "비행후기", pinned: false, title: "야간 비행 허가 신청 경험담", excerpt: "야간 특별비행승인 신청 과정 정리", author: "나이트플라이어", date: "2026.07.04", comments: 5, likes: 14, views: 355, authorInitial: "나", body: "야간 특별비행승인은 일반 비행승인보다 서류가 더 필요합니다.\n\n조명장치 사양서와 비상연락체계를 별도로 제출해야 했습니다." }
+];
+
+const COMMENTS = [
+  { initial: "김", author: "김비행사", date: "2026.07.10", body: "좋은 정보 감사합니다!" },
+  { initial: "이", author: "이하늘", date: "2026.07.10", body: "저도 다음에 참고해볼게요." },
+  { initial: "박", author: "박조종", date: "2026.07.09", body: "혹시 자세한 자료 더 있을까요?" }
+];
+
+const EVENTS = [
+  { month: "7월", day: "18", title: "2026 드론 안전비행 세미나" },
+  { month: "8월", day: "02", title: "한강 정기모임" },
+  { month: "8월", day: "22", title: "산업용 드론 박람회 참관" }
+];
+
+class Component extends DCLogic {
+  state = {
+    view: "feed",
+    loggedIn: false,
+    activeCategory: "전체",
+    selectedPostId: null,
+    posts: INITIAL_POSTS,
+    authTab: "login",
+    formCategory: WRITE_CATEGORIES[0],
+    formTitle: "",
+    formBody: "",
+    authName: "",
+    authEmail: "",
+    authPassword: ""
+  };
+
+  goTo(view) {
+    this.setState({ view });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const filteredPosts = (s.activeCategory === "전체" ? s.posts : s.posts.filter(p => p.category === s.activeCategory))
+      .slice()
+      .sort((a, b) => (b.pinned === a.pinned ? b.id - a.id : b.pinned ? 1 : -1));
+
+    const selectedPost = s.posts.find(p => p.id === s.selectedPostId) || s.posts[0];
+
+    const navLinkBase = "font-size:13.5px; font-weight:600; cursor:pointer; color:#c8d8e8; white-space:nowrap;";
+
+    return {
+      isFeed: s.view === "feed",
+      isPost: s.view === "post",
+      isWrite: s.view === "write",
+      isLogin: s.view === "login",
+      isSignup: s.authTab === "signup",
+      loggedIn: s.loggedIn,
+      notLoggedIn: !s.loggedIn,
+
+      navLinkStyle_board: navLinkBase + (s.view === "feed" ? "color:#ffffff;" : ""),
+      navLinkStyle_static: navLinkBase,
+
+      goTo_feed: () => this.setState({ view: "feed" }),
+      goTo_write: () => {
+        if (!s.loggedIn) { this.setState({ view: "login" }); return; }
+        this.setState({ view: "write" });
+      },
+      goTo_login: () => this.setState({ view: "login" }),
+      logout: () => this.setState({ loggedIn: false, view: "feed" }),
+
+      categories: CATEGORY_LIST.map(cat => ({
+        label: cat,
+        style: "padding:8px 10px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;" +
+          (cat === s.activeCategory ? "background:#eaf2fa; color:#245a8a;" : "color:#4a5a6a;"),
+        onClick: () => this.setState({ activeCategory: cat })
+      })),
+      activeCategoryLabel: s.activeCategory,
+      postCount: filteredPosts.length,
+
+      filteredPosts: filteredPosts.map(p => ({
+        ...p,
+        onClick: () => this.setState({ view: "post", selectedPostId: p.id })
+      })),
+
+      events: EVENTS,
+      dummyComments: COMMENTS,
+
+      selectedPost: selectedPost,
+
+      writeCategories: WRITE_CATEGORIES,
+      formCategory: s.formCategory,
+      onFormCategoryChange: (e) => this.setState({ formCategory: e.target.value }),
+      formTitle: s.formTitle,
+      onFormTitleChange: (e) => this.setState({ formTitle: e.target.value }),
+      formBody: s.formBody,
+      onFormBodyChange: (e) => this.setState({ formBody: e.target.value }),
+
+      submitPost: () => {
+        const title = s.formTitle.trim() || "제목 없음";
+        const body = s.formBody.trim() || "내용이 없습니다.";
+        const newPost = {
+          id: Date.now(),
+          category: s.formCategory,
+          pinned: false,
+          title,
+          excerpt: body.slice(0, 40),
+          author: "홍길동",
+          date: "2026.07.12",
+          comments: 0,
+          likes: 0,
+          views: 0,
+          authorInitial: "홍",
+          body
+        };
+        this.setState({
+          posts: [newPost, ...s.posts],
+          view: "feed",
+          activeCategory: "전체",
+          formTitle: "",
+          formBody: ""
+        });
+      },
+
+      authTabStyle_login: "flex:1; text-align:center; padding-bottom:10px; font-size:13.5px; font-weight:700; cursor:pointer;" +
+        (s.authTab === "login" ? "color:#0f2136; border-bottom:2px solid #3d7ab5;" : "color:#9aa4b1;"),
+      authTabStyle_signup: "flex:1; text-align:center; padding-bottom:10px; font-size:13.5px; font-weight:700; cursor:pointer;" +
+        (s.authTab === "signup" ? "color:#0f2136; border-bottom:2px solid #3d7ab5;" : "color:#9aa4b1;"),
+      setAuthTab_login: () => this.setState({ authTab: "login" }),
+      setAuthTab_signup: () => this.setState({ authTab: "signup" }),
+
+      authName: s.authName,
+      onAuthNameChange: (e) => this.setState({ authName: e.target.value }),
+      authEmail: s.authEmail,
+      onAuthEmailChange: (e) => this.setState({ authEmail: e.target.value }),
+      authPassword: s.authPassword,
+      onAuthPasswordChange: (e) => this.setState({ authPassword: e.target.value }),
+      authSubmitLabel: s.authTab === "login" ? "로그인" : "가입하기",
+
+      submitAuth: () => {
+        this.setState({ loggedIn: true, view: "feed" });
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>
