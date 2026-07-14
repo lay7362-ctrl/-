@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { api } from "@/lib/api";
+import { api, getFileUrl } from "@/lib/api";
 
 interface Comment {
   id: number;
@@ -67,9 +67,13 @@ export function PostDetail() {
           <span>{post.author}</span><span>·</span><span>{post.date}</span><span>·</span><span>조회 {post.views}</span>
         </div>
 
-        <div style={{ width: "100%", height: 280, margin: "20px 0", borderRadius: 10, background: "repeating-linear-gradient(45deg,#e7edf3,#e7edf3 8px,#dbe4ec 8px,#dbe4ec 16px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: "#8a9bb0" }}>DRONE PHOTO PLACEHOLDER — 1600×900</span>
-        </div>
+        {post.imageKey && (
+          <img
+            src={getFileUrl(post.imageKey)}
+            alt={post.title}
+            style={{ width: "100%", maxHeight: 480, objectFit: "cover", borderRadius: 10, margin: "20px 0", display: "block" }}
+          />
+        )}
 
         <div style={{ fontSize: 14.5, color: "#3a4452", lineHeight: 1.9, whiteSpace: "pre-line" }}>{post.body}</div>
 

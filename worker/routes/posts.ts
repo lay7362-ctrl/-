@@ -14,6 +14,7 @@ interface PostRow {
   likes: number;
   views: number;
   body: string;
+  image_key: string | null;
 }
 
 interface CommentRow {
@@ -38,6 +39,7 @@ function toPost(row: PostRow) {
     likes: row.likes,
     views: row.views,
     body: row.body,
+    ...(row.image_key ? { imageKey: row.image_key } : {}),
   };
 }
 
@@ -107,11 +109,12 @@ export async function handlePosts(request: Request, env: Env, pathname: string):
       authorInitial: string;
       date: string;
       body: string;
+      imageKey?: string;
     };
 
     const result = await env.DB.prepare(
-      "INSERT INTO posts (category, pinned, title, excerpt, author, author_initial, date, comments, likes, views, body) VALUES (?,0,?,?,?,?,?,0,0,0,?) RETURNING *"
-    ).bind(body.category, body.title, body.excerpt, body.author, body.authorInitial, body.date, body.body).first<PostRow>();
+      "INSERT INTO posts (category, pinned, title, excerpt, author, author_initial, date, comments, likes, views, body, image_key) VALUES (?,0,?,?,?,?,?,0,0,0,?,?) RETURNING *"
+    ).bind(body.category, body.title, body.excerpt, body.author, body.authorInitial, body.date, body.body, body.imageKey ?? null).first<PostRow>();
 
     return new Response(JSON.stringify({ success: true, data: result ? toPost(result) : null } satisfies ApiResponse), { status: 201, headers });
   }

@@ -11,6 +11,7 @@ export interface Post {
   views: number;
   authorInitial: string;
   body: string;
+  imageKey?: string;
 }
 
 export interface Comment {

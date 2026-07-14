@@ -52,6 +52,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         authorInitial: post.authorInitial,
         date: post.date,
         body: post.body,
+        imageKey: post.imageKey,
       });
       if (res.success && res.data) {
         setPosts((prev) => [res.data!, ...prev]);

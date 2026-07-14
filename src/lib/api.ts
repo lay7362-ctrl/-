@@ -2,6 +2,10 @@ import type { ApiResponse, Post, User } from "@/types";
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "/api";
 
+export function getFileUrl(key: string) {
+  return `${BASE}/files/${key}`;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<ApiResponse<T>> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -19,6 +23,7 @@ export const api = {
     get: (id: number) => request<Post>(`/posts/${id}`),
     create: (data: Omit<Post, "id" | "comments" | "likes" | "views" | "pinned">) =>
       request<Post>("/posts", { method: "POST", body: JSON.stringify(data) }),
+
     comments: (id: number) =>
       request<{ id: number; initial: string; author: string; body: string; date: string }[]>(`/posts/${id}/comments`),
     addComment: (id: number, data: { author: string; initial: string; body: string }) =>
