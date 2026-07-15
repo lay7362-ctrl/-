@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["logo.png"],
+      includeAssets: ["icon-192.png", "icon-512.png"],
       manifest: {
         name: "한국드론앤데이터협회 (KDDA)",
         short_name: "KDDA",
@@ -19,8 +19,8 @@ export default defineConfig({
         start_url: "/",
         lang: "ko",
         icons: [
-          { src: "/logo.png", sizes: "192x192", type: "image/png" },
-          { src: "/logo.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
       workbox: {
