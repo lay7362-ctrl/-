@@ -114,7 +114,7 @@ export function PostDetail() {
               스크랩
             </button>
           </div>
-          {loggedIn && post.author === "홍길동" && (
+          {loggedIn && (
             <button
               onClick={handleDelete}
               disabled={deleting}
