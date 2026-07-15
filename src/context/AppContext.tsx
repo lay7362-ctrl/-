@@ -11,6 +11,7 @@ interface AppContextType {
   setLoggedIn: (v: boolean) => void;
   setActiveCategory: (cat: string) => void;
   addPost: (post: Post) => void;
+  removePost: (id: number) => void;
   logout: () => void;
   refetchPosts: () => void;
 }
@@ -64,12 +65,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts((prev) => [post, ...prev]);
   }
 
+  function removePost(id: number) {
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+  }
+
   function logout() {
     setLoggedIn(false);
   }
 
   return (
-    <AppContext.Provider value={{ loggedIn, posts, activeCategory, loading, setLoggedIn, setActiveCategory, addPost, logout, refetchPosts: fetchPosts }}>
+    <AppContext.Provider value={{ loggedIn, posts, activeCategory, loading, setLoggedIn, setActiveCategory, addPost, removePost, logout, refetchPosts: fetchPosts }}>
       {children}
     </AppContext.Provider>
   );

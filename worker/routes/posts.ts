@@ -99,6 +99,12 @@ export async function handlePosts(request: Request, env: Env, pathname: string):
     return new Response(JSON.stringify({ success: true, data: results } satisfies ApiResponse), { status: 201, headers });
   }
 
+  // DELETE /api/posts/:id
+  if (request.method === "DELETE" && matchId) {
+    await env.DB.prepare("DELETE FROM posts WHERE id = ?").bind(matchId[1]).run();
+    return new Response(JSON.stringify({ success: true } satisfies ApiResponse), { headers });
+  }
+
   // POST /api/posts
   if (request.method === "POST" && pathname === "/api/posts") {
     const body = (await request.json()) as {

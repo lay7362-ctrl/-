@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useApp } from "@/context/AppContext";
 import { api, getFileUrl } from "@/lib/api";
 import type { Post } from "@/types";
 
@@ -14,12 +15,14 @@ interface Comment {
 export function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { loggedIn, removePost } = useApp();
 
   const [post, setPost] = useState<Post | null>(null);
   const [postLoading, setPostLoading] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -49,6 +52,20 @@ export function PostDetail() {
       setCommentText("");
     }
     setSubmitting(false);
+  }
+
+  async function handleDelete() {
+    if (!post || deleting) return;
+    if (!window.confirm("이 게시글을 삭제하시겠습니까?")) return;
+    setDeleting(true);
+    const res = await api.posts.delete(post.id);
+    if (res.success) {
+      removePost(post.id);
+      navigate("/");
+    } else {
+      alert("삭제에 실패했습니다. 다시 시도해주세요.");
+      setDeleting(false);
+    }
   }
 
   if (postLoading) {
@@ -88,13 +105,24 @@ export function PostDetail() {
 
         <div style={{ fontSize: 14.5, color: "#3a4452", lineHeight: 1.9, whiteSpace: "pre-line" }}>{post.body}</div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 28 }}>
-          <button style={{ background: "#eaf2fa", color: "#245a8a", border: "1px solid #cfe3f5", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-            추천 {post.likes}
-          </button>
-          <button style={{ background: "#f5f7f9", color: "#6b7684", border: "1px solid #e2e6eb", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            스크랩
-          </button>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button style={{ background: "#eaf2fa", color: "#245a8a", border: "1px solid #cfe3f5", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+              추천 {post.likes}
+            </button>
+            <button style={{ background: "#f5f7f9", color: "#6b7684", border: "1px solid #e2e6eb", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              스크랩
+            </button>
+          </div>
+          {loggedIn && post.author === "홍길동" && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{ background: deleting ? "#e8b4b8" : "#fff", color: "#c0392b", border: "1px solid #e8b4b8", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 600, cursor: deleting ? "not-allowed" : "pointer" }}
+            >
+              {deleting ? "삭제 중..." : "삭제"}
+            </button>
+          )}
         </div>
       </div>
 

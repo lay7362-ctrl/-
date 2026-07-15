@@ -30,6 +30,7 @@ export const api = {
     create: (data: Omit<Post, "id" | "comments" | "likes" | "views" | "pinned">) =>
       request<Post>("/posts", { method: "POST", body: JSON.stringify(data) }),
 
+    delete: (id: number) => request(`/posts/${id}`, { method: "DELETE" }),
     comments: (id: number) =>
       request<{ id: number; initial: string; author: string; body: string; date: string }[]>(`/posts/${id}/comments`),
     addComment: (id: number, data: { author: string; initial: string; body: string }) =>
