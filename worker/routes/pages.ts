@@ -5,7 +5,28 @@ interface PageRow {
   slug: string;
   title: string;
   content: string;
+  files: string; // JSON string: PageFile[]
   updated_at: string;
+}
+
+export interface PageFile {
+  key: string;
+  name: string;
+  type: string;
+}
+
+interface PageData {
+  slug: string;
+  title: string;
+  content: string;
+  files: PageFile[];
+  updated_at: string;
+}
+
+function parseRow(row: PageRow): PageData {
+  let files: PageFile[] = [];
+  try { files = JSON.parse(row.files || "[]"); } catch { /* ignore */ }
+  return { ...row, files };
 }
 
 export async function handlePages(
@@ -27,21 +48,22 @@ export async function handlePages(
     if (!row) {
       return new Response(JSON.stringify({ success: false, error: "Page not found" } satisfies ApiResponse), { status: 404, headers });
     }
-    return new Response(JSON.stringify({ success: true, data: row } satisfies ApiResponse), { headers });
+    return new Response(JSON.stringify({ success: true, data: parseRow(row) } satisfies ApiResponse), { headers });
   }
 
   // PUT /api/pages/:slug
   if (request.method === "PUT") {
-    const body = (await request.json()) as { content: string };
+    const body = (await request.json()) as { content: string; files?: PageFile[] };
     if (typeof body.content !== "string") {
       return new Response(JSON.stringify({ success: false, error: "content required" } satisfies ApiResponse), { status: 400, headers });
     }
+    const filesJson = JSON.stringify(Array.isArray(body.files) ? body.files : []);
     await env.DB.prepare(
-      "UPDATE pages SET content = ?, updated_at = datetime('now') WHERE slug = ?"
-    ).bind(body.content, slug).run();
+      "UPDATE pages SET content = ?, files = ?, updated_at = datetime('now') WHERE slug = ?"
+    ).bind(body.content, filesJson, slug).run();
 
     const row = await env.DB.prepare("SELECT * FROM pages WHERE slug = ?").bind(slug).first<PageRow>();
-    return new Response(JSON.stringify({ success: true, data: row } satisfies ApiResponse), { headers });
+    return new Response(JSON.stringify({ success: true, data: parseRow(row!) } satisfies ApiResponse), { headers });
   }
 
   return new Response(JSON.stringify({ success: false, error: "Method not allowed" } satisfies ApiResponse), { status: 405, headers });

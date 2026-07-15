@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getFileUrl } from "@/lib/api";
 import type { Post } from "@/types";
 
 export function PostCard({ post }: { post: Post }) {
@@ -21,15 +22,23 @@ export function PostCard({ post }: { post: Post }) {
       }}
     >
       {/* 썸네일 */}
-      <div style={{
-        width: 112, height: 80, borderRadius: 8, flexShrink: 0,
-        background: "repeating-linear-gradient(45deg,#e7edf3,#e7edf3 6px,#dbe4ec 6px,#dbe4ec 12px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 8.5, color: "#8a9bb0", textAlign: "center", lineHeight: 1.4 }}>
-          DRONE<br />PHOTO
-        </span>
-      </div>
+      {post.imageKey ? (
+        <img
+          src={getFileUrl(post.imageKey)}
+          alt={post.title}
+          style={{ width: 112, height: 80, borderRadius: 8, flexShrink: 0, objectFit: "cover", display: "block" }}
+        />
+      ) : (
+        <div style={{
+          width: 112, height: 80, borderRadius: 8, flexShrink: 0,
+          background: "repeating-linear-gradient(45deg,#e7edf3,#e7edf3 6px,#dbe4ec 6px,#dbe4ec 12px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 8.5, color: "#8a9bb0", textAlign: "center", lineHeight: 1.4 }}>
+            DRONE<br />PHOTO
+          </span>
+        </div>
+      )}
 
       {/* 내용 */}
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>

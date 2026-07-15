@@ -1,5 +1,11 @@
 import type { ApiResponse, Post, User } from "@/types";
 
+export interface PageFile {
+  key: string;
+  name: string;
+  type: string; // MIME type
+}
+
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "/api";
 
 export function getFileUrl(key: string) {
@@ -51,11 +57,12 @@ export const api = {
   },
 
   pages: {
-    get: (slug: string) => request<{ slug: string; title: string; content: string; updated_at: string }>(`/pages/${slug}`),
-    update: (slug: string, content: string) =>
-      request<{ slug: string; title: string; content: string; updated_at: string }>(`/pages/${slug}`, {
+    get: (slug: string) =>
+      request<{ slug: string; title: string; content: string; files: PageFile[]; updated_at: string }>(`/pages/${slug}`),
+    update: (slug: string, content: string, files: PageFile[]) =>
+      request<{ slug: string; title: string; content: string; files: PageFile[]; updated_at: string }>(`/pages/${slug}`, {
         method: "PUT",
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, files }),
       }),
   },
 

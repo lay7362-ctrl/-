@@ -36,7 +36,7 @@ export async function handleFiles(
 
   // GET /api/files/* — R2에서 파일 제공
   if (request.method === "GET" && pathname.startsWith("/api/files/")) {
-    const key = pathname.replace("/api/files/", "");
+    const key = decodeURIComponent(pathname.replace("/api/files/", ""));
     const object = await env.BUCKET.get(key);
 
     if (!object) {

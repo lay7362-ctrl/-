@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { DroneIcon } from "@/components/DroneIcon";
+
 
 export function Login() {
   const navigate = useNavigate();
@@ -33,8 +33,8 @@ export function Login() {
       <div style={{ width: 380, background: "#fff", border: "1px solid #e2e6eb", borderRadius: 14, padding: 32 }}>
         {/* 로고 */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 22 }}>
-          <DroneIcon size={30} />
-          <span style={{ fontSize: 16, fontWeight: 800, color: "#0f2136" }}>KDA 드론협회</span>
+          <img src="/logo.png" alt="협회 로고" style={{ width: 38, height: 38, objectFit: "contain" }} />
+          <span style={{ fontSize: 16, fontWeight: 800, color: "#0f2136" }}>KDDA 드론협회</span>
         </div>
 
         {/* 탭 */}

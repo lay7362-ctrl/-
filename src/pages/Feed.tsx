@@ -13,21 +13,22 @@ export function Feed() {
     <main style={{ flex: 1, width: "100%" }}>
       {/* 히어로 배너 */}
       <div style={{
-        background: "linear-gradient(120deg, #07EADF, #173657)",
-        padding: "36px 32px",
+        background: "linear-gradient(130deg, #091e33 0%, #0e3354 55%, #085e6a 100%)",
+        padding: "40px 32px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 24, flexWrap: "wrap",
+        borderBottom: "1px solid #07C7B920",
       }}>
         <div>
-          <div style={{ color: "#7fa8cc", fontSize: 12, fontWeight: 700, letterSpacing: "1px", marginBottom: 8 }}>공식 회원 커뮤니티</div>
-          <div style={{ color: "#fff", fontSize: 26, fontWeight: 800, marginBottom: 6 }}>대한민국 드론 산업을 함께 만듭니다</div>
-          <div style={{ color: "#DAE3EC", fontSize: 14 }}>비행 정보 공유, 기체 리뷰, 행사 소식까지 — 회원 여러분의 이야기</div>
+          <div style={{ color: "#07C7B9", fontSize: 11.5, fontWeight: 700, letterSpacing: "1.4px", marginBottom: 10, textTransform: "uppercase" }}>공식 회원 커뮤니티</div>
+          <div style={{ color: "#ffffff", fontSize: 26, fontWeight: 800, marginBottom: 8, letterSpacing: "-0.3px" }}>대한민국 드론 산업을 함께 만듭니다</div>
+          <div style={{ color: "#9bbfcc", fontSize: 13.5 }}>비행 정보 공유, 기체 리뷰, 행사 소식까지 — 회원 여러분의 이야기</div>
         </div>
-        <div style={{ display: "flex", gap: 28 }}>
+        <div style={{ display: "flex", gap: 36 }}>
           {[{ num: "12,480", label: "회원수" }, { num: "3,207", label: "게시글" }, { num: "18", label: "예정 행사" }].map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>
-              <div style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>{s.num}</div>
-              <div style={{ color: "#7fa8cc", fontSize: 11, fontWeight: 600, letterSpacing: "0.4px" }}>{s.label}</div>
+              <div style={{ color: "#ffffff", fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px" }}>{s.num}</div>
+              <div style={{ color: "#07C7B9", fontSize: 11, fontWeight: 600, letterSpacing: "0.6px", marginTop: 3 }}>{s.label}</div>
             </div>
           ))}
         </div>

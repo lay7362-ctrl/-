@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useApp } from "@/context/AppContext";
 import { api, getFileUrl } from "@/lib/api";
+import type { Post } from "@/types";
 
 interface Comment {
   id: number;
@@ -14,13 +14,20 @@ interface Comment {
 export function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { posts } = useApp();
 
-  const post = posts.find((p) => p.id === Number(id)) ?? posts[0];
-
+  const [post, setPost] = useState<Post | null>(null);
+  const [postLoading, setPostLoading] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    setPostLoading(true);
+    api.posts.get(Number(id)).then((res) => {
+      if (res.success && res.data) setPost(res.data);
+    }).finally(() => setPostLoading(false));
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -42,6 +49,10 @@ export function PostDetail() {
       setCommentText("");
     }
     setSubmitting(false);
+  }
+
+  if (postLoading) {
+    return <div style={{ padding: 32, color: "#a3adba" }}>불러오는 중...</div>;
   }
 
   if (!post) {

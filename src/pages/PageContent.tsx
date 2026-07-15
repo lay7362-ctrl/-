@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { api } from "@/lib/api";
+import { api, getFileUrl, type PageFile } from "@/lib/api";
 
 const PAGE_META: Record<string, { title: string; placeholder: string }> = {
   about: {
@@ -18,15 +18,29 @@ const PAGE_META: Record<string, { title: string; placeholder: string }> = {
   },
 };
 
+function isPdf(file: PageFile) {
+  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+}
+
+function isImage(file: PageFile) {
+  return file.type.startsWith("image/");
+}
+
 export function PageContent() {
   const { slug } = useParams<{ slug: string }>();
   const { loggedIn } = useApp();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [content, setContent] = useState("");
+  const [files, setFiles] = useState<PageFile[]>([]);
   const [updatedAt, setUpdatedAt] = useState("");
   const [loading, setLoading] = useState(true);
+
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState("");
+  const [editFiles, setEditFiles] = useState<PageFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -35,29 +49,59 @@ export function PageContent() {
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
-    api.pages.get(slug).then((res) => {
-      if (res.success && res.data) {
-        setContent(res.data.content);
-        setUpdatedAt(res.data.updated_at);
-      }
-      setLoading(false);
-    });
+    api.pages.get(slug)
+      .then((res) => {
+        if (res.success && res.data) {
+          setContent(res.data.content);
+          setFiles(res.data.files ?? []);
+          setUpdatedAt(res.data.updated_at);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [slug]);
 
   function startEdit() {
     setEditText(content);
+    setEditFiles(files);
+    setUploadError(null);
     setSaveError(null);
     setEditing(true);
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    if (selected.length === 0) return;
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    setUploading(true);
+    setUploadError(null);
+
+    for (const file of selected) {
+      const res = await api.files.upload(file);
+      if (res.success && res.data) {
+        setEditFiles((prev) => [...prev, { key: res.data!.key, name: file.name, type: file.type }]);
+      } else {
+        setUploadError(`"${file.name}" 업로드 실패: ${res.error ?? "오류"}`);
+      }
+    }
+
+    setUploading(false);
+  }
+
+  function removeEditFile(key: string) {
+    setEditFiles((prev) => prev.filter((f) => f.key !== key));
   }
 
   async function handleSave() {
     if (!slug || saving) return;
     setSaving(true);
     setSaveError(null);
-    const res = await api.pages.update(slug, editText);
+    const res = await api.pages.update(slug, editText, editFiles);
     setSaving(false);
     if (res.success && res.data) {
       setContent(res.data.content);
+      setFiles(res.data.files ?? []);
       setUpdatedAt(res.data.updated_at);
       setEditing(false);
     } else {
@@ -87,7 +131,7 @@ export function PageContent() {
           <div style={{ color: "#a3adba", fontSize: 14, padding: "20px 0" }}>불러오는 중...</div>
         ) : editing ? (
           /* 편집 모드 */
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
@@ -95,7 +139,7 @@ export function PageContent() {
               autoFocus
               style={{
                 width: "100%",
-                minHeight: 400,
+                minHeight: 320,
                 border: "1px solid #cfd6de",
                 borderRadius: 8,
                 padding: 14,
@@ -104,9 +148,79 @@ export function PageContent() {
                 resize: "vertical",
                 fontFamily: "inherit",
                 color: "#1a2330",
+                boxSizing: "border-box",
               }}
             />
+
+            {/* 파일 첨부 영역 */}
+            <div style={{ border: "1px dashed #c5cdd8", borderRadius: 10, padding: 18, background: "#f9fafc" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: editFiles.length > 0 ? 14 : 0 }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  multiple
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  id="page-file-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: uploading ? "#c5cdd8" : "#e8f0f9",
+                    color: uploading ? "#8a9ab0" : "#3d7ab5",
+                    border: "1px solid #c5d8ee",
+                    borderRadius: 7, padding: "8px 16px", fontSize: 13, fontWeight: 600,
+                    cursor: uploading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {uploading ? "업로드 중..." : "📎 파일 첨부 (이미지 · PDF)"}
+                </button>
+                <span style={{ fontSize: 12, color: "#9aa5b1" }}>여러 파일 동시 선택 가능</span>
+              </div>
+
+              {uploadError && (
+                <div style={{ fontSize: 12.5, color: "#c0392b", marginBottom: 8 }}>{uploadError}</div>
+              )}
+
+              {/* 첨부된 파일 목록 */}
+              {editFiles.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {editFiles.map((f) => (
+                    <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1px solid #e2e6eb", borderRadius: 8, padding: "8px 12px" }}>
+                      {isImage(f) ? (
+                        <img
+                          src={getFileUrl(f.key)}
+                          alt={f.name}
+                          style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6, flexShrink: 0 }}
+                        />
+                      ) : (
+                        <div style={{ width: 48, height: 48, background: "#fde9e9", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+                          📄
+                        </div>
+                      )}
+                      <span style={{ flex: 1, fontSize: 13, color: "#3a4452", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {f.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeEditFile(f.key)}
+                        style={{ background: "none", border: "none", color: "#b0bac5", fontSize: 18, cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0 }}
+                        title="삭제"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {saveError && <div style={{ fontSize: 12.5, color: "#c0392b" }}>{saveError}</div>}
+
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
               <button
                 onClick={() => setEditing(false)}
@@ -116,19 +230,64 @@ export function PageContent() {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
-                style={{ background: saving ? "#7fa8cc" : "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13.5, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer" }}
+                disabled={saving || uploading}
+                style={{ background: (saving || uploading) ? "#7fa8cc" : "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13.5, fontWeight: 700, cursor: (saving || uploading) ? "not-allowed" : "pointer" }}
               >
                 {saving ? "저장 중..." : "저장"}
               </button>
             </div>
           </div>
-        ) : content ? (
+        ) : (content || files.length > 0) ? (
           /* 보기 모드 — 내용 있음 */
           <div>
-            <div style={{ fontSize: 14.5, color: "#3a4452", lineHeight: 1.9, whiteSpace: "pre-line" }}>
-              {content}
-            </div>
+            {content && (
+              <div style={{ fontSize: 14.5, color: "#3a4452", lineHeight: 1.9, whiteSpace: "pre-line", marginBottom: files.length > 0 ? 28 : 0 }}>
+                {content}
+              </div>
+            )}
+
+            {/* 첨부 파일 뷰어 */}
+            {files.length > 0 && (
+              <div>
+                {content && <hr style={{ border: "none", borderTop: "1px solid #edf0f3", marginBottom: 24 }} />}
+
+                {/* 이미지 그리드 */}
+                {files.filter(isImage).length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: files.filter(isPdf).length > 0 ? 18 : 0 }}>
+                    {files.filter(isImage).map((f) => (
+                      <a key={f.key} href={getFileUrl(f.key)} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={getFileUrl(f.key)}
+                          alt={f.name}
+                          style={{ width: 180, height: 130, objectFit: "cover", borderRadius: 10, border: "1px solid #e2e6eb", display: "block" }}
+                        />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* PDF 목록 */}
+                {files.filter(isPdf).length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {files.filter(isPdf).map((f) => (
+                      <a
+                        key={f.key}
+                        href={getFileUrl(f.key)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={f.name}
+                        style={{ display: "flex", alignItems: "center", gap: 10, background: "#fef9f9", border: "1px solid #f0dada", borderRadius: 8, padding: "10px 14px", textDecoration: "none" }}
+                      >
+                        <span style={{ fontSize: 22 }}>📄</span>
+                        <span style={{ fontSize: 13.5, color: "#c0392b", fontWeight: 600 }}>{f.name}</span>
+                        <span style={{ marginLeft: "auto", fontSize: 12, color: "#b0bac5" }}>다운로드</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {updatedAt && (
               <div style={{ fontSize: 11.5, color: "#b8c0ca", marginTop: 24, textAlign: "right" }}>
                 최종 수정: {updatedAt.slice(0, 10).replace(/-/g, ".")}

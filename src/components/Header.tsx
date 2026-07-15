@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { DroneIcon } from "./DroneIcon";
 
 export function Header() {
   const navigate = useNavigate();
@@ -30,13 +29,13 @@ export function Header() {
       <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
         {/* 로고 */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }} onClick={() => navigate("/")}>
-          <DroneIcon size={34} />
+          <img src="/logo.png" alt="협회 로고" style={{ width: 44, height: 44, objectFit: "contain" }} />
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
             <span style={{ fontSize: 15, fontWeight: 800, color: "#ffffff", letterSpacing: "0.2px" }}>
               KDDA<br />한국드론앤데이터협회
             </span>
-            <span style={{ fontSize: 10, fontWeight: 500, color: "#7fa8cc", letterSpacing: "0.6px" }}>
-              KOREA DRONE ASSOCIATION
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#d4f5f2", letterSpacing: "0.6px" }}>
+              KOREA DRONE AND DATA ASSOCIATION
             </span>
           </div>
         </div>
