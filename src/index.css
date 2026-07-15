@@ -3,3 +3,37 @@ body { margin: 0; background: #f5f7f9; font-family: 'Inter', -apple-system, sans
 ::selection { background: #cfe3f5; }
 input, textarea, select, button { font-family: inherit; }
 input:focus, textarea:focus, select:focus { outline: none; }
+
+/* 모바일 전역 반응형 */
+@media (max-width: 768px) {
+  /* 피드/목록 레이아웃 */
+  .feed-layout {
+    flex-direction: column !important;
+    padding: 16px !important;
+    gap: 16px !important;
+  }
+  .feed-sidebar { display: none !important; }
+  .feed-main { max-width: 100% !important; }
+
+  /* 포스트 카드 */
+  .post-card {
+    padding: 16px !important;
+  }
+
+  /* 글쓰기/상세 페이지 */
+  .write-container, .post-detail-container {
+    padding: 16px !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* 푸터 */
+  footer {
+    padding: 16px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .feed-layout { padding: 10px !important; }
+}
