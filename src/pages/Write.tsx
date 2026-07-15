@@ -3,11 +3,13 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { WRITE_CATEGORIES } from "@/data/initial";
 import { api } from "@/lib/api";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Post } from "@/types";
 
 export function Write() {
   const navigate = useNavigate();
   const { loggedIn, addPost } = useApp();
+  const isMobile = useIsMobile();
   const [formCategory, setFormCategory] = useState(WRITE_CATEGORIES[0]);
   const [formTitle, setFormTitle] = useState("");
   const [formBody, setFormBody] = useState("");
@@ -92,10 +94,13 @@ export function Write() {
     navigate("/");
   }
 
+  const pad = isMobile ? "16px 12px" : "32px";
+  const cardPad = isMobile ? 16 : 28;
+
   return (
-    <main style={{ flex: 1, maxWidth: 760, margin: "0 auto", width: "100%", padding: 32 }}>
-      <div style={{ fontSize: 20, fontWeight: 800, color: "#0f2136", marginBottom: 20 }}>새 글 작성</div>
-      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: 28, display: "flex", flexDirection: "column", gap: 16 }}>
+    <main style={{ flex: 1, maxWidth: 760, margin: "0 auto", width: "100%", padding: pad }}>
+      <div style={{ fontSize: isMobile ? 18 : 20, fontWeight: 800, color: "#0f2136", marginBottom: 20 }}>새 글 작성</div>
+      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: cardPad, display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* 카테고리 */}
         <div>
@@ -118,7 +123,7 @@ export function Write() {
 
           {imagePreview ? (
             <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid #e2e6eb" }}>
-              <img src={imagePreview} alt="미리보기" style={{ width: "100%", maxHeight: 320, objectFit: "cover", display: "block" }} />
+              <img src={imagePreview} alt="미리보기" style={{ width: "100%", maxHeight: isMobile ? 200 : 320, objectFit: "cover", display: "block" }} />
               {imageUploading && (
                 <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>업로드 중...</span>
@@ -142,7 +147,7 @@ export function Write() {
               style={{
                 border: `1.5px dashed ${dragging ? "#3d7ab5" : "#cfd6de"}`,
                 borderRadius: 10,
-                height: 120,
+                height: isMobile ? 90 : 120,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -155,7 +160,7 @@ export function Write() {
             >
               <span style={{ fontSize: 22, color: "#9aa4b1" }}>📷</span>
               <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: "#9aa4b1" }}>
-                이미지를 드래그하거나 클릭하여 업로드
+                {isMobile ? "탭하여 이미지 업로드" : "이미지를 드래그하거나 클릭하여 업로드"}
               </span>
               <span style={{ fontSize: 11, color: "#b8c0ca" }}>JPG, PNG, GIF · 최대 10MB</span>
             </div>
@@ -166,7 +171,7 @@ export function Write() {
         {/* 내용 */}
         <div>
           <div style={{ fontSize: 12.5, fontWeight: 700, color: "#4a5a6a", marginBottom: 6 }}>내용</div>
-          <textarea placeholder="내용을 입력하세요" value={formBody} onChange={(e) => setFormBody(e.target.value)} style={{ width: "100%", height: 220, border: "1px solid #e2e6eb", borderRadius: 8, padding: 12, fontSize: 14, lineHeight: 1.6, resize: "vertical" }} />
+          <textarea placeholder="내용을 입력하세요" value={formBody} onChange={(e) => setFormBody(e.target.value)} style={{ width: "100%", height: isMobile ? 160 : 220, border: "1px solid #e2e6eb", borderRadius: 8, padding: 12, fontSize: 14, lineHeight: 1.6, resize: "vertical" }} />
         </div>
 
         {/* 버튼 */}

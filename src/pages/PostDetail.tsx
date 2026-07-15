@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { api, getFileUrl } from "@/lib/api";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import type { Post } from "@/types";
 
 interface Comment {
@@ -16,6 +17,7 @@ export function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { loggedIn, removePost } = useApp();
+  const isMobile = useIsMobile();
 
   const [post, setPost] = useState<Post | null>(null);
   const [postLoading, setPostLoading] = useState(true);
@@ -68,27 +70,30 @@ export function PostDetail() {
     }
   }
 
+  const pad = isMobile ? "16px 12px" : "32px";
+  const cardPad = isMobile ? 16 : 32;
+
   if (postLoading) {
-    return <div style={{ padding: 32, color: "#a3adba" }}>불러오는 중...</div>;
+    return <div style={{ padding: pad, color: "#a3adba" }}>불러오는 중...</div>;
   }
 
   if (!post) {
-    return <div style={{ padding: 32 }}>게시글을 찾을 수 없습니다.</div>;
+    return <div style={{ padding: pad }}>게시글을 찾을 수 없습니다.</div>;
   }
 
   return (
-    <main style={{ flex: 1, maxWidth: 860, margin: "0 auto", width: "100%", padding: 32 }}>
+    <main style={{ flex: 1, maxWidth: 860, margin: "0 auto", width: "100%", padding: pad }}>
       <div style={{ fontSize: 13, color: "#3d7ab5", fontWeight: 700, cursor: "pointer", marginBottom: 16 }} onClick={() => navigate("/")}>
         ← 목록으로
       </div>
 
       {/* 본문 카드 */}
-      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: 32 }}>
+      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: cardPad }}>
         <span style={{ background: "#eaf2fa", color: "#245a8a", fontSize: 11.5, fontWeight: 700, padding: "3px 9px", borderRadius: 5 }}>
           {post.category}
         </span>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#0f2136", margin: "14px 0 10px" }}>{post.title}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12.5, color: "#8a94a3", paddingBottom: 18, borderBottom: "1px solid #eef1f4" }}>
+        <div style={{ fontSize: isMobile ? 18 : 24, fontWeight: 800, color: "#0f2136", margin: "14px 0 10px" }}>{post.title}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12.5, color: "#8a94a3", paddingBottom: 18, borderBottom: "1px solid #eef1f4", flexWrap: "wrap" }}>
           <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#dbe4ec", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#4a5a6a" }}>
             {post.authorInitial}
           </div>
@@ -99,13 +104,13 @@ export function PostDetail() {
           <img
             src={getFileUrl(post.imageKey)}
             alt={post.title}
-            style={{ width: "100%", maxHeight: 480, objectFit: "cover", borderRadius: 10, margin: "20px 0", display: "block" }}
+            style={{ width: "100%", maxHeight: isMobile ? 240 : 480, objectFit: "cover", borderRadius: 10, margin: "20px 0", display: "block" }}
           />
         )}
 
         <div style={{ fontSize: 14.5, color: "#3a4452", lineHeight: 1.9, whiteSpace: "pre-line" }}>{post.body}</div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, flexWrap: "wrap", gap: 10 }}>
           <div style={{ display: "flex", gap: 10 }}>
             <button style={{ background: "#eaf2fa", color: "#245a8a", border: "1px solid #cfe3f5", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
               추천 {post.likes}
@@ -127,7 +132,7 @@ export function PostDetail() {
       </div>
 
       {/* 댓글 */}
-      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: "24px 32px", marginTop: 16 }}>
+      <div style={{ background: "#fff", border: "1px solid #e2e6eb", borderRadius: 12, padding: `24px ${cardPad}px`, marginTop: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: "#0f2136", marginBottom: 14 }}>댓글 {comments.length}</div>
 
         {comments.length === 0 && (
