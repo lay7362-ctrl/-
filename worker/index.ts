@@ -4,6 +4,7 @@ import { handleUsers } from "./routes/users";
 import { handleFiles } from "./routes/files";
 import { handlePosts } from "./routes/posts";
 import { handlePages } from "./routes/pages";
+import { handleAuth } from "./routes/auth";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -20,6 +21,10 @@ export default {
     }
 
     try {
+      if (pathname.startsWith("/api/auth")) {
+        return await handleAuth(request, env, pathname);
+      }
+
       if (pathname.startsWith("/api/users")) {
         return await handleUsers(request, env, pathname);
       }

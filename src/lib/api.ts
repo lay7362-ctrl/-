@@ -13,8 +13,12 @@ export function getFileUrl(key: string) {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  const token = localStorage.getItem("auth_token");
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
   return res.json() as Promise<ApiResponse<T>>;

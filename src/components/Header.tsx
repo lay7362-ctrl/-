@@ -13,7 +13,7 @@ const navItems = [
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loggedIn, logout } = useApp();
+  const { loggedIn, logout, currentUser } = useApp();
   const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -61,15 +61,14 @@ export function Header() {
               <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #7fa8cc", flexShrink: 0 }} />
               <input placeholder="검색어를 입력하세요" style={{ background: "transparent", border: "none", color: "#eaf2fa", fontSize: 13, width: "100%" }} />
             </div>
-            {loggedIn ? (
+            {loggedIn && (
               <>
                 <button onClick={() => navigate("/write")} style={{ background: "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>글쓰기</button>
-                <div onClick={() => logout()} title="로그아웃" style={{ width: 34, height: 34, borderRadius: "50%", background: "#244a6e", display: "flex", alignItems: "center", justifyContent: "center", color: "#eaf2fa", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>홍</div>
-              </>
-            ) : (
-              <>
-                <span onClick={() => navigate("/login")} style={{ color: "#c8d8e8", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>로그인</span>
-                <button onClick={() => navigate("/login")} style={{ background: "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>회원가입</button>
+                <div onClick={() => logout()} title={`${currentUser?.name ?? "사용자"} (로그아웃)`} style={{ width: 34, height: 34, borderRadius: "50%", background: "#244a6e", display: "flex", alignItems: "center", justifyContent: "center", color: "#eaf2fa", fontSize: 13, fontWeight: 700, cursor: "pointer", overflow: "hidden", flexShrink: 0 }}>
+                  {currentUser?.picture
+                    ? <img src={currentUser.picture} alt="프로필" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover" }} />
+                    : (currentUser?.name?.[0] ?? "??")}
+                </div>
               </>
             )}
           </div>
@@ -114,15 +113,10 @@ export function Header() {
             </div>
           ))}
           <div style={{ display: "flex", gap: 10, padding: "14px 20px" }}>
-            {loggedIn ? (
+            {loggedIn && (
               <>
                 <button onClick={() => goTo("/write")} style={{ flex: 1, background: "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "11px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>글쓰기</button>
                 <button onClick={() => { logout(); setMenuOpen(false); }} style={{ flex: 1, background: "#244a6e", color: "#c8d8e8", border: "none", borderRadius: 8, padding: "11px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>로그아웃</button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => goTo("/login")} style={{ flex: 1, background: "#244a6e", color: "#c8d8e8", border: "none", borderRadius: 8, padding: "11px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>로그인</button>
-                <button onClick={() => goTo("/login")} style={{ flex: 1, background: "#3d7ab5", color: "#fff", border: "none", borderRadius: 8, padding: "11px 0", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>회원가입</button>
               </>
             )}
           </div>

@@ -4,6 +4,13 @@ export interface Env {
   ENVIRONMENT: string;
   CORS_ORIGIN: string;
   JWT_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  NAVER_CLIENT_ID: string;
+  NAVER_CLIENT_SECRET: string;
+  KAKAO_CLIENT_ID: string;
+  KAKAO_CLIENT_SECRET: string;
+  FRONTEND_URL: string;
 }
 
 export interface ApiResponse<T = unknown> {
